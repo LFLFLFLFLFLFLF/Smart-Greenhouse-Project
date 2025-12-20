@@ -7,7 +7,7 @@
 "broker_config": {
     "address":"test.mosquitto.org",
     "port":1883,
-    "base_topic":"polito/iot/G8/Greenhouse"
+    "clientID":"polito/iot/G8/Greenhouse"
 },
 
 "services": {
@@ -71,4 +71,5 @@
         "action_on_low": "start_fertigation"
     }
 }
+
 }
