@@ -1,17 +1,17 @@
 {
     "system_info": {
         "project_name": "Smart Greenhouse Team",
-        "last_update": "2025-12-20 23:52:38"
+        "last_update": "2025-12-21 03:13:02"
     },
 
 "broker_config": {
     "address":"test.mosquitto.org",
     "port":1883,
-    "clientID":"polito/iot/G8/Greenhouse"
+    "base_topic":"polito/iot/group8/greenhouse"
 },
 
 "services": {
-    "catalog": {"url":"http://服务器地址"},
+    "catalog": {"url":"http://127.0.0.1:8000/catalog"},
     "thingspeak_adaptor": {"status": "active"},
     "control_brain": {"strategy": "climate_v1"}
 },
@@ -73,3 +73,4 @@
 }
 
 }
+
