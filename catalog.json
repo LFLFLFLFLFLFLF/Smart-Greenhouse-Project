@@ -7,7 +7,8 @@
 "broker_config": {
     "address":"test.mosquitto.org",
     "port":1883,
-    "base_topic":"polito/iot/group8/greenhouse"
+    "base_topic":"polito/iot/group8/greenhouse",
+    "clientID_prefix": "GHG8_"
 },
 
 "services": {
@@ -73,4 +74,5 @@
 }
 
 }
+
 
