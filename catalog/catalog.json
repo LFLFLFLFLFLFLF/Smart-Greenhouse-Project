@@ -71,5 +71,54 @@
         "unit": "mg/kg",
         "action_on_low": "start_fertigation"
     }
-}
+},
+
+"plants": [
+    {
+      "plant_id": "tomato",
+      "display_name": "Tomato",
+      "stages": ["seedling", "vegetative", "flowering", "fruiting", "harvest"]
+    },
+    {
+      "plant_id": "lettuce",
+      "display_name": "Lettuce",
+      "stages": ["seedling", "vegetative", "harvest"]
+    }
+  ],
+
+"growth_criteria": {
+    "tomato": {
+      "plant_id": "tpl-tomato-flowering",
+      "stage": "flowering",
+      "temperature": { "min": 22, "max": 28 },
+      "humidity": { "min": 60, "max": 75 },
+      "co2": { "min": 400, "max": 800 },
+      "illumination": { "min_lux": 12000, "max_lux": 20000 }
+    },
+    "lettuce": {
+      "plant_id": "tpl-lettuce-veg",
+      "stage": "vegetative",
+      "temperature": { "min": 16, "max": 22 },
+      "humidity": { "min": 55, "max": 70 },
+      "co2": { "min": 350, "max": 700 }
+    }
+},
+
+"greenhouse_id": [
+    {
+    "greenhouse_id": "zone-A",
+    "name": "Tomato Area",
+    "plant_id": "tomato",
+    "stage": "flowering",
+    "template_id": "tpl-tomato-flowering"
+    },
+    {
+    "greenhouse_id": "zone-B",
+    "name": "Lettuce Area",
+    "plant_id": "lettuce",
+    "stage": "vegetative",
+    "template_id": "tpl-lettuce-vegetative"
+    }
+]
+
 }
