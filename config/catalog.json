@@ -1,0 +1,316 @@
+{
+    "broker": "test.mosquitto.org",
+    "port": 1883,
+    "base_topic": "polito/iot/group8/greenhouse",
+    "greenhouses": [
+        {
+            "greenhouse_id": "GH1",
+            "plant_type": "tomato",
+            "sampling_sec": 5,
+            "control_sec": 5,
+            "thresholds": {
+                "temperature": {
+                    "min": 17.0,
+                    "max": 27.0,
+                    "unit": "Celsius"
+                },
+                "humidity": {
+                    "min": 50.0,
+                    "max": 80.0,
+                    "unit": "%"
+                },
+                "light": {
+                    "min": 50.0,
+                    "max": 5000.0,
+                    "shade_cloth_threshold": 4500.0,
+                    "unit": "lux"
+                },
+                "soil_moist": {
+                    "min": 50.0,
+                    "max": 80.0,
+                    "unit": "%"
+                },
+                "fertility": {
+                    "min_n": 50.0,
+                    "min_p": 50.0,
+                    "min_k": 50.0,
+                    "unit": "mg/kg"
+                }
+            },
+            "sensors": [
+                {
+                    "device_id": "GH1_temperature",
+                    "type": "sensor",
+                    "sensor_type": "temperature",
+                    "topic": "polito/iot/group8/greenhouse/GH1/sensors/temperature"
+                },
+                {
+                    "device_id": "GH1_humidity",
+                    "type": "sensor",
+                    "sensor_type": "humidity",
+                    "topic": "polito/iot/group8/greenhouse/GH1/sensors/humidity"
+                },
+                {
+                    "device_id": "GH1_light",
+                    "type": "sensor",
+                    "sensor_type": "light",
+                    "topic": "polito/iot/group8/greenhouse/GH1/sensors/light"
+                },
+                {
+                    "device_id": "GH1_co2",
+                    "type": "sensor",
+                    "sensor_type": "co2",
+                    "topic": "polito/iot/group8/greenhouse/GH1/sensors/co2"
+                },
+                {
+                    "device_id": "GH1_soil_moist_0",
+                    "type": "sensor",
+                    "sensor_type": "soil_moist",
+                    "topic": "polito/iot/group8/greenhouse/GH1/sensors/soil_moist_0"
+                },
+                {
+                    "device_id": "GH1_fertility_n_0",
+                    "type": "sensor",
+                    "sensor_type": "fertility_n",
+                    "topic": "polito/iot/group8/greenhouse/GH1/sensors/fertility_n_0"
+                },
+                {
+                    "device_id": "GH1_fertility_p_0",
+                    "type": "sensor",
+                    "sensor_type": "fertility_p",
+                    "topic": "polito/iot/group8/greenhouse/GH1/sensors/fertility_p_0"
+                },
+                {
+                    "device_id": "GH1_fertility_k_0",
+                    "type": "sensor",
+                    "sensor_type": "fertility_k",
+                    "topic": "polito/iot/group8/greenhouse/GH1/sensors/fertility_k_0"
+                }
+            ],
+            "actuators": [
+                {
+                    "device_id": "GH1_air_con",
+                    "type": "actuator",
+                    "actuator_type": "air_con",
+                    "topic": "polito/iot/group8/greenhouse/GH1/commands/air_con"
+                },
+                {
+                    "device_id": "GH1_heater",
+                    "type": "actuator",
+                    "actuator_type": "heater",
+                    "topic": "polito/iot/group8/greenhouse/GH1/commands/heater"
+                },
+                {
+                    "device_id": "GH1_grow_light_0",
+                    "type": "actuator",
+                    "actuator_type": "grow_light",
+                    "topic": "polito/iot/group8/greenhouse/GH1/commands/grow_light_0"
+                },
+                {
+                    "device_id": "GH1_shade_cloth",
+                    "type": "actuator",
+                    "actuator_type": "shade_cloth",
+                    "topic": "polito/iot/group8/greenhouse/GH1/commands/shade_cloth"
+                },
+                {
+                    "device_id": "GH1_irrigation_0",
+                    "type": "actuator",
+                    "actuator_type": "irrigation",
+                    "topic": "polito/iot/group8/greenhouse/GH1/commands/irrigation_0"
+                },
+                {
+                    "device_id": "GH1_nitrogen_pump_0",
+                    "type": "actuator",
+                    "actuator_type": "nitrogen_pump",
+                    "topic": "polito/iot/group8/greenhouse/GH1/commands/nitrogen_pump_0"
+                },
+                {
+                    "device_id": "GH1_phosphorus_pump_0",
+                    "type": "actuator",
+                    "actuator_type": "phosphorus_pump",
+                    "topic": "polito/iot/group8/greenhouse/GH1/commands/phosphorus_pump_0"
+                },
+                {
+                    "device_id": "GH1_potassium_pump_0",
+                    "type": "actuator",
+                    "actuator_type": "potassium_pump",
+                    "topic": "polito/iot/group8/greenhouse/GH1/commands/potassium_pump_0"
+                }
+            ]
+        },
+        {
+            "greenhouse_id": "GH2",
+            "plant_type": "lettuce",
+            "sampling_sec": 5,
+            "control_sec": 5,
+            "thresholds": {
+                "temperature": {
+                    "min": 15.0,
+                    "max": 22.0,
+                    "unit": "Celsius"
+                },
+                "humidity": {
+                    "min": 45.0,
+                    "max": 75.0,
+                    "unit": "%"
+                },
+                "light": {
+                    "min": 80.0,
+                    "max": 4000.0,
+                    "shade_cloth_threshold": 3500.0,
+                    "unit": "lux"
+                },
+                "soil_moist": {
+                    "min": 55.0,
+                    "max": 85.0,
+                    "unit": "%"
+                },
+                "fertility": {
+                    "min_n": 40.0,
+                    "min_p": 35.0,
+                    "min_k": 45.0,
+                    "unit": "mg/kg"
+                }
+            },
+            "sensors": [
+                {
+                    "device_id": "GH2_temperature",
+                    "type": "sensor",
+                    "sensor_type": "temperature",
+                    "topic": "polito/iot/group8/greenhouse/GH2/sensors/temperature"
+                },
+                {
+                    "device_id": "GH2_humidity",
+                    "type": "sensor",
+                    "sensor_type": "humidity",
+                    "topic": "polito/iot/group8/greenhouse/GH2/sensors/humidity"
+                },
+                {
+                    "device_id": "GH2_light",
+                    "type": "sensor",
+                    "sensor_type": "light",
+                    "topic": "polito/iot/group8/greenhouse/GH2/sensors/light"
+                },
+                {
+                    "device_id": "GH2_co2",
+                    "type": "sensor",
+                    "sensor_type": "co2",
+                    "topic": "polito/iot/group8/greenhouse/GH2/sensors/co2"
+                },
+                {
+                    "device_id": "GH2_soil_moist_0",
+                    "type": "sensor",
+                    "sensor_type": "soil_moist",
+                    "topic": "polito/iot/group8/greenhouse/GH2/sensors/soil_moist_0"
+                },
+                {
+                    "device_id": "GH2_fertility_n_0",
+                    "type": "sensor",
+                    "sensor_type": "fertility_n",
+                    "topic": "polito/iot/group8/greenhouse/GH2/sensors/fertility_n_0"
+                },
+                {
+                    "device_id": "GH2_fertility_p_0",
+                    "type": "sensor",
+                    "sensor_type": "fertility_p",
+                    "topic": "polito/iot/group8/greenhouse/GH2/sensors/fertility_p_0"
+                },
+                {
+                    "device_id": "GH2_fertility_k_0",
+                    "type": "sensor",
+                    "sensor_type": "fertility_k",
+                    "topic": "polito/iot/group8/greenhouse/GH2/sensors/fertility_k_0"
+                }
+            ],
+            "actuators": [
+                {
+                    "device_id": "GH2_air_con",
+                    "type": "actuator",
+                    "actuator_type": "air_con",
+                    "topic": "polito/iot/group8/greenhouse/GH2/commands/air_con"
+                },
+                {
+                    "device_id": "GH2_heater",
+                    "type": "actuator",
+                    "actuator_type": "heater",
+                    "topic": "polito/iot/group8/greenhouse/GH2/commands/heater"
+                },
+                {
+                    "device_id": "GH2_grow_light_0",
+                    "type": "actuator",
+                    "actuator_type": "grow_light",
+                    "topic": "polito/iot/group8/greenhouse/GH2/commands/grow_light_0"
+                },
+                {
+                    "device_id": "GH2_shade_cloth",
+                    "type": "actuator",
+                    "actuator_type": "shade_cloth",
+                    "topic": "polito/iot/group8/greenhouse/GH2/commands/shade_cloth"
+                },
+                {
+                    "device_id": "GH2_irrigation_0",
+                    "type": "actuator",
+                    "actuator_type": "irrigation",
+                    "topic": "polito/iot/group8/greenhouse/GH2/commands/irrigation_0"
+                },
+                {
+                    "device_id": "GH2_nitrogen_pump_0",
+                    "type": "actuator",
+                    "actuator_type": "nitrogen_pump",
+                    "topic": "polito/iot/group8/greenhouse/GH2/commands/nitrogen_pump_0"
+                },
+                {
+                    "device_id": "GH2_phosphorus_pump_0",
+                    "type": "actuator",
+                    "actuator_type": "phosphorus_pump",
+                    "topic": "polito/iot/group8/greenhouse/GH2/commands/phosphorus_pump_0"
+                },
+                {
+                    "device_id": "GH2_potassium_pump_0",
+                    "type": "actuator",
+                    "actuator_type": "potassium_pump",
+                    "topic": "polito/iot/group8/greenhouse/GH2/commands/potassium_pump_0"
+                }
+            ]
+        }
+    ],
+    "actuator_types": [
+        "air_con",
+        "heater",
+        "grow_light",
+        "shade_cloth",
+        "irrigation",
+        "nitrogen_pump",
+        "phosphorus_pump",
+        "potassium_pump"
+    ],
+    "actuator_labels": {
+        "air_con": "air_con",
+        "heater": "heater",
+        "grow_light": "grow_light",
+        "shade_cloth": "shade_cloth",
+        "irrigation": "irrigation",
+        "nitrogen_pump": "Nitrogen Pump (N)",
+        "phosphorus_pump": "Phosphorus Pump (P)",
+        "potassium_pump": "Potassium Pump (K)"
+    },
+    "thingspeak": {
+        "enabled": true,
+        "update_sec": 60,
+        "endpoint": "https://api.thingspeak.com/update",
+        "channels": {
+            "GH1": {
+                "api_key": "PUT_GH2_WRITE_API_KEY_HERE"
+            },
+            "GH2": {
+                "api_key": "PUT_GH2_WRITE_API_KEY_HERE"
+            }
+        }
+    },
+    "services": {
+        "catalog": "http://127.0.0.1:8080",
+        "sensor": "http://127.0.0.1:8001",
+        "actuator": "http://127.0.0.1:8002",
+        "dashboard": "http://127.0.0.1:5000"
+    }
+}
