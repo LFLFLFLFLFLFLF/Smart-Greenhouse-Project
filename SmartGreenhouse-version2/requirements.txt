@@ -1,0 +1,6 @@
+cherrypy
+requests
+paho-mqtt
+cherrypy
+requests
+paho-mqtt
