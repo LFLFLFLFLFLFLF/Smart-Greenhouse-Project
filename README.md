@@ -1,6 +1,6 @@
 # Smart Greenhouse Project
 
-Course-level microservice IoT platform for smart greenhouses.
+A microservice IoT platform for smart greenhouses.
 
 ## Structure
 
@@ -11,7 +11,7 @@ catalog/      REST catalog and device registry
 devices/      sensor and actuator connectors
 control/      greenhouse controller
 cloud/        ThingSpeak adaptor
-dashboard/    simple web dashboard
+dashboard/    simple web dashboard    
 ```
 
 ## Features
@@ -29,6 +29,13 @@ dashboard/    simple web dashboard
   - `potassium_pump (K)`
 
 Internal actuator types remain `nitrogen_pump`, `phosphorus_pump`, and `potassium_pump`; the `(N/P/K)` suffix is a display label to avoid confusion.
+
+## Note About Dashboard
+
+The Dashboard is provided only as a demonstration and testing interface.  
+The main focus of this project is the IoT backend architecture: Catalog, REST APIs, MQTT communication, SensorConnector, ActuatorConnector, Controller, and ThingSpeakAdaptor.
+
+All core functions can be tested through REST requests and MQTT messages without using the Dashboard.
 
 ## Install
 
