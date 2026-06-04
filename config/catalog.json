@@ -300,7 +300,7 @@
         "endpoint": "https://api.thingspeak.com/update",
         "channels": {
             "GH1": {
-                "api_key": "PUT_GH1_WRITE_API_KEY_HERE"
+                "api_key": "PUT_GH2_WRITE_API_KEY_HERE"
             },
             "GH2": {
                 "api_key": "PUT_GH2_WRITE_API_KEY_HERE"
