@@ -11,58 +11,24 @@ sys.path.insert(0, str(ROOT))
 def join_topic(*parts):
     return "/".join(str(part).strip("/") for part in parts if str(part).strip("/"))
 
-MULTI_SENSOR_TYPES = {
-    "soil_moist",
-    "fertility_n",
-    "fertility_p",
-    "fertility_k"
-}
+def is_multiple(device_config):
+    return device_config.get("mode") == "multiple"
 
-MULTI_ACTUATOR_TYPES = {
-    "grow_light",
-    "irrigation",
-    "nitrogen_pump",
-    "phosphorus_pump",
-    "potassium_pump"
-}
-
-SENSOR_TYPES = {
-    "temperature",
-    "humidity",
-    "light",
-    "co2",
-    "soil_moist",
-    "fertility_n",
-    "fertility_p",
-    "fertility_k"
-}
-
-ACTUATOR_TYPES = {
-    "air_con",
-    "heater",
-    "grow_light",
-    "shade_cloth",
-    "irrigation",
-    "nitrogen_pump",
-    "phosphorus_pump",
-    "potassium_pump"
-}
-
-DEFAULT_THRESHOLDS = {
-    "temperature": {"min": 17.0, "max": 27.0, "unit": "Celsius"},
-    "humidity": {"min": 50.0, "max": 80.0, "unit": "%"},
-    "light": {"min": 50.0, "max": 5000.0, "shade_cloth_threshold": 4500.0, "unit": "lux"},
-    "soil_moist": {"min": 50.0, "max": 80.0, "unit": "%"},
-    "fertility": {"min_n": 50.0, "min_p": 50.0, "min_k": 50.0, "unit": "mg/kg"}
-}
-
-def device_name(greenhouse_id, device_type, index):
-    if device_type in MULTI_SENSOR_TYPES or device_type in MULTI_ACTUATOR_TYPES:
+def device_name(greenhouse_id, device_type, index, device_config):
+    if is_multiple(device_config):
         return f"{greenhouse_id}_{device_type}_{index}"
     return f"{greenhouse_id}_{device_type}"
 
 def topic_name(greenhouse_id, device_id):
     return device_id.removeprefix(f"{greenhouse_id}_")
+
+def single_device_conflict(greenhouse_id, device_kind, device_type, existing):
+    cherrypy.response.status = 409
+    return {
+        "status": "error",
+        "message": f"{greenhouse_id} already has {device_type} {device_kind}. No new device was added.",
+        "existing_device": existing
+    }
 
 class CatalogUtils:
     def __init__(self, file_path):
@@ -130,12 +96,13 @@ class Catalog:
                 if greenhouse["greenhouse_id"] == greenhouse_id:
                     return {"status": "already_registered", "greenhouse": greenhouse}
 
+            defaults = self.catalog.data.get("greenhouse_defaults", {})
             greenhouse = {
                 "greenhouse_id": greenhouse_id,
                 "plant_type": body.get("plant_type", "unknown"),
-                "sampling_sec": int(body.get("sampling_sec", 5)),
-                "control_sec": int(body.get("control_sec", 5)),
-                "thresholds": deepcopy(body.get("thresholds", DEFAULT_THRESHOLDS)),
+                "sampling_sec": int(body.get("sampling_sec", defaults.get("sampling_sec", 5))),
+                "control_sec": int(body.get("control_sec", defaults.get("control_sec", 5))),
+                "thresholds": deepcopy(body.get("thresholds", defaults.get("thresholds", {}))),
                 "sensors": [],
                 "actuators": []
             }
@@ -156,27 +123,22 @@ class Catalog:
         broker = self.catalog.data["broker"]
         port = self.catalog.data["port"]
         base_topic = self.catalog.data["base_topic"]
+        device_types = self.catalog.data.get("device_types", {})
 
         if body["type"] == "sensor":
             sensor_type = body["sensor_type"]
-            if sensor_type not in SENSOR_TYPES:
+            sensor_config = device_types.get("sensors", {}).get(sensor_type)
+            if sensor_config is None:
                 raise cherrypy.HTTPError(400, "unknown sensor_type")
-            if sensor_type not in MULTI_SENSOR_TYPES:
+            if not is_multiple(sensor_config):
                 existing = next(
                     (s for s in greenhouse["sensors"] if s["sensor_type"] == sensor_type),
                     None
                 )
                 if existing:
-                    return {
-                        "broker": broker,
-                        "port": port,
-                        "topic": existing["topic"],
-                        "device_id": existing["device_id"],
-                        "device": existing,
-                        "status": "already_registered"
-                    }
+                    return single_device_conflict(greenhouse_id, "sensor", sensor_type, existing)
             index = len([s for s in greenhouse["sensors"] if s["sensor_type"] == sensor_type])
-            device_id = device_name(greenhouse_id, sensor_type, index)
+            device_id = device_name(greenhouse_id, sensor_type, index, sensor_config)
             topic = join_topic(base_topic, greenhouse_id, "sensors", topic_name(greenhouse_id, device_id))
             device = {
                 "device_id": device_id,
@@ -187,24 +149,18 @@ class Catalog:
             greenhouse["sensors"].append(device)
         elif body["type"] == "actuator":
             actuator_type = body["actuator_type"]
-            if actuator_type not in ACTUATOR_TYPES:
+            actuator_config = device_types.get("actuators", {}).get(actuator_type)
+            if actuator_config is None:
                 raise cherrypy.HTTPError(400, "unknown actuator_type")
-            if actuator_type not in MULTI_ACTUATOR_TYPES:
+            if not is_multiple(actuator_config):
                 existing = next(
                     (a for a in greenhouse["actuators"] if a["actuator_type"] == actuator_type),
                     None
                 )
                 if existing:
-                    return {
-                        "broker": broker,
-                        "port": port,
-                        "topic": existing["topic"],
-                        "device_id": existing["device_id"],
-                        "device": existing,
-                        "status": "already_registered"
-                    }
+                    return single_device_conflict(greenhouse_id, "actuator", actuator_type, existing)
             index = len([a for a in greenhouse["actuators"] if a["actuator_type"] == actuator_type])
-            device_id = device_name(greenhouse_id, actuator_type, index)
+            device_id = device_name(greenhouse_id, actuator_type, index, actuator_config)
             topic = join_topic(base_topic, greenhouse_id, "commands", topic_name(greenhouse_id, device_id))
             device = {
                 "device_id": device_id,

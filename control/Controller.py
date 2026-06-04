@@ -23,15 +23,6 @@ def get_greenhouse(catalog, greenhouse_id):
             return greenhouse
     raise ValueError(f"greenhouse_id not found: {greenhouse_id}")
 
-NPK_DEVICE_LABELS = {
-    "nitrogen_pump": "nitrogen_pump (N)",
-    "phosphorus_pump": "phosphorus_pump (P)",
-    "potassium_pump": "potassium_pump (K)"
-}
-
-def device_label(device):
-    return NPK_DEVICE_LABELS.get(device, device)
-
 class Controller:
     def __init__(self, catalog_url):
         self.catalog_url = catalog_url.rstrip("/")

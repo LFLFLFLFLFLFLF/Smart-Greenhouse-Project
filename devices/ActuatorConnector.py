@@ -12,37 +12,18 @@ sys.path.insert(0, str(ROOT))
 
 from mqtt.MyMQTT import MQTTclient
 
-ACTUATOR_TYPES = [
-    "air_con",
-    "heater",
-    "grow_light",
-    "shade_cloth",
-    "irrigation",
-    "nitrogen_pump",
-    "phosphorus_pump",
-    "potassium_pump"
-]
-
-NPK_DEVICE_LABELS = {
-    "nitrogen_pump": "nitrogen_pump (N)",
-    "phosphorus_pump": "phosphorus_pump (P)",
-    "potassium_pump": "potassium_pump (K)"
-}
-
-def device_label(device):
-    return NPK_DEVICE_LABELS.get(device, device)
-
 def load_json(path):
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
 
 class Actuator:
-    def __init__(self, greenhouse_id, device, broker, port, states):
+    def __init__(self, greenhouse_id, device, broker, port, label, states):
         self.greenhouse_id = greenhouse_id
         self.actuator_type = device["actuator_type"]
         self.device_id = device["device_id"]
         self.broker = broker
         self.port = port
+        self.label = label
         self.topic = device["topic"]
         self.states = states
         self.client = MQTTclient(self.device_id, self.broker, self.port)
@@ -59,7 +40,7 @@ class Actuator:
     def start(self):
         self.client.start()
         self.client.subscribe(self.topic, qos=0)
-        print(f"[Actuator] {self.greenhouse_id} {device_label(self.actuator_type)} subscribes {self.topic}")
+        print(f"[Actuator] {self.greenhouse_id} {self.label} subscribes {self.topic}")
 
     def notify(self, client, userdata, msg):
         command = json.loads(msg.payload.decode("utf-8"))
@@ -158,7 +139,9 @@ def start_actuator(device, greenhouse, catalog, states, command_topics, actuator
     command_topics.setdefault(greenhouse_id, {})[device_id] = device["topic"]
     if device_id in actuators:
         return
-    actuator = Actuator(greenhouse_id, device, catalog["broker"], catalog["port"], states)
+    actuator_config = catalog["device_types"]["actuators"][device["actuator_type"]]
+    label = actuator_config.get("label", device["actuator_type"])
+    actuator = Actuator(greenhouse_id, device, catalog["broker"], catalog["port"], label, states)
     actuator.start()
     actuators[device_id] = actuator
 

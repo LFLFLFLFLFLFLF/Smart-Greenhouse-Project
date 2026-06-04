@@ -10,17 +10,6 @@ sys.path.insert(0, str(ROOT))
 
 from mqtt.MyMQTT import MQTTclient
 
-FIELD_TO_THINGSPEAK = {
-    "temperature": "field1",
-    "humidity": "field2",
-    "light": "field3",
-    "soil_moist": "field4",
-    "co2": "field5",
-    "fertility_n": "field6",
-    "fertility_p": "field7",
-    "fertility_k": "field8"
-}
-
 def load_json(path):
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
@@ -38,6 +27,10 @@ class ThingSpeakAdaptor:
     def load_config(self):
         catalog = requests.get(f"{self.catalog_url}/catalog", timeout=5).json()
         self.thingspeak = catalog["thingspeak"]
+        self.field_map = {
+            sensor_type: config.get("thingspeak_field")
+            for sensor_type, config in catalog.get("device_types", {}).get("sensors", {}).items()
+        }
         self.update_sec = max(int(self.thingspeak.get("update_sec", 60)), 15)
         self.sensor_topic = join_topic(catalog["base_topic"], "+", "sensors", "#")
         if self.client is None:
@@ -66,7 +59,7 @@ class ThingSpeakAdaptor:
             return None
         payload = {"api_key": channel["api_key"]}
         for name, values in values_by_name.items():
-            field = FIELD_TO_THINGSPEAK.get(name)
+            field = self.field_map.get(name)
             if field and values:
                 payload[field] = sum(values) / len(values)
         return payload
