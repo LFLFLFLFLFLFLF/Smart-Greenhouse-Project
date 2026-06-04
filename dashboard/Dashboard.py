@@ -9,17 +9,6 @@ import requests
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-SENSOR_TYPES = [
-    "temperature",
-    "humidity",
-    "light",
-    "co2",
-    "soil_moist",
-    "fertility_n",
-    "fertility_p",
-    "fertility_k"
-]
-
 def load_json(path):
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
@@ -68,6 +57,13 @@ class Dashboard:
             catalog = self.catalog()
             greenhouse_id = params.get("greenhouse_id", self.default_greenhouse_id)
             greenhouse = self.greenhouse(catalog, greenhouse_id)
+            device_types = catalog.get("device_types", {})
+            sensor_types = list(device_types.get("sensors", {}).keys())
+            actuator_types = list(device_types.get("actuators", {}).keys())
+            actuator_labels = {
+                actuator_type: config.get("label", actuator_type)
+                for actuator_type, config in device_types.get("actuators", {}).items()
+            }
             cherrypy.response.headers["Content-Type"] = "application/json"
             return json.dumps({
                 "greenhouses": [
@@ -78,9 +74,9 @@ class Dashboard:
                     for greenhouse in catalog["greenhouses"]
                 ],
                 "default_greenhouse_id": self.default_greenhouse_id,
-                "sensor_types": SENSOR_TYPES,
-                "actuator_types": catalog.get("actuator_types", []),
-                "device_labels": catalog.get("actuator_labels", {}),
+                "sensor_types": sensor_types,
+                "actuator_types": actuator_types,
+                "device_labels": actuator_labels,
                 "sensors": greenhouse.get("sensors", []),
                 "actuators": greenhouse.get("actuators", []),
                 "actions": self.actions
@@ -108,6 +104,7 @@ class Dashboard:
         if len(uri) == 2 and uri[0] == "api" and uri[1] == "devices":
             body = cherrypy.request.json
             response = requests.post(f"{self.catalog_url}/devices", json=body, timeout=5)
+            cherrypy.response.status = response.status_code
             return {"status_code": response.status_code, "response": response.json()}
         raise cherrypy.HTTPError(404, "resource not found")
 

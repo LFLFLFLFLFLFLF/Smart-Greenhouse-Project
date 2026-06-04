@@ -2,6 +2,117 @@
     "broker": "test.mosquitto.org",
     "port": 1883,
     "base_topic": "polito/iot/group8/greenhouse",
+    "device_types": {
+        "sensors": {
+            "temperature": {
+                "mode": "single",
+                "unit": "Celsius",
+                "thingspeak_field": "field1"
+            },
+            "humidity": {
+                "mode": "single",
+                "unit": "%",
+                "thingspeak_field": "field2"
+            },
+            "light": {
+                "mode": "single",
+                "unit": "lux",
+                "thingspeak_field": "field3"
+            },
+            "soil_moist": {
+                "mode": "multiple",
+                "unit": "%",
+                "thingspeak_field": "field4"
+            },
+            "co2": {
+                "mode": "single",
+                "unit": "ppm",
+                "thingspeak_field": "field5"
+            },
+            "fertility_n": {
+                "mode": "multiple",
+                "unit": "mg/kg",
+                "thingspeak_field": "field6"
+            },
+            "fertility_p": {
+                "mode": "multiple",
+                "unit": "mg/kg",
+                "thingspeak_field": "field7"
+            },
+            "fertility_k": {
+                "mode": "multiple",
+                "unit": "mg/kg",
+                "thingspeak_field": "field8"
+            }
+        },
+        "actuators": {
+            "air_con": {
+                "mode": "single",
+                "label": "air_con"
+            },
+            "heater": {
+                "mode": "single",
+                "label": "heater"
+            },
+            "grow_light": {
+                "mode": "multiple",
+                "label": "grow_light"
+            },
+            "shade_cloth": {
+                "mode": "single",
+                "label": "shade_cloth"
+            },
+            "irrigation": {
+                "mode": "multiple",
+                "label": "irrigation"
+            },
+            "nitrogen_pump": {
+                "mode": "multiple",
+                "label": "Nitrogen Pump (N)"
+            },
+            "phosphorus_pump": {
+                "mode": "multiple",
+                "label": "Phosphorus Pump (P)"
+            },
+            "potassium_pump": {
+                "mode": "multiple",
+                "label": "Potassium Pump (K)"
+            }
+        }
+    },
+    "greenhouse_defaults": {
+        "sampling_sec": 5,
+        "control_sec": 5,
+        "thresholds": {
+            "temperature": {
+                "min": 17.0,
+                "max": 27.0,
+                "unit": "Celsius"
+            },
+            "humidity": {
+                "min": 50.0,
+                "max": 80.0,
+                "unit": "%"
+            },
+            "light": {
+                "min": 50.0,
+                "max": 5000.0,
+                "shade_cloth_threshold": 4500.0,
+                "unit": "lux"
+            },
+            "soil_moist": {
+                "min": 50.0,
+                "max": 80.0,
+                "unit": "%"
+            },
+            "fertility": {
+                "min_n": 50.0,
+                "min_p": 50.0,
+                "min_k": 50.0,
+                "unit": "mg/kg"
+            }
+        }
+    },
     "greenhouses": [
         {
             "greenhouse_id": "GH1",
@@ -274,33 +385,13 @@
             ]
         }
     ],
-    "actuator_types": [
-        "air_con",
-        "heater",
-        "grow_light",
-        "shade_cloth",
-        "irrigation",
-        "nitrogen_pump",
-        "phosphorus_pump",
-        "potassium_pump"
-    ],
-    "actuator_labels": {
-        "air_con": "air_con",
-        "heater": "heater",
-        "grow_light": "grow_light",
-        "shade_cloth": "shade_cloth",
-        "irrigation": "irrigation",
-        "nitrogen_pump": "Nitrogen Pump (N)",
-        "phosphorus_pump": "Phosphorus Pump (P)",
-        "potassium_pump": "Potassium Pump (K)"
-    },
     "thingspeak": {
         "enabled": true,
         "update_sec": 60,
         "endpoint": "https://api.thingspeak.com/update",
         "channels": {
             "GH1": {
-                "api_key": "PUT_GH2_WRITE_API_KEY_HERE"
+                "api_key": "PUT_GH1_WRITE_API_KEY_HERE"
             },
             "GH2": {
                 "api_key": "PUT_GH2_WRITE_API_KEY_HERE"

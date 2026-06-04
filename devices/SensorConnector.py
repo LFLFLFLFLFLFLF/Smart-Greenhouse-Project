@@ -13,28 +13,6 @@ sys.path.insert(0, str(ROOT))
 
 from mqtt.MyMQTT import MQTTclient
 
-UNITS = {
-    "temperature": "Celsius",
-    "humidity": "%",
-    "light": "lux",
-    "co2": "ppm",
-    "soil_moist": "%",
-    "fertility_n": "mg/kg",
-    "fertility_p": "mg/kg",
-    "fertility_k": "mg/kg"
-}
-
-SENSOR_TYPES = [
-    "temperature",
-    "humidity",
-    "light",
-    "co2",
-    "soil_moist",
-    "fertility_n",
-    "fertility_p",
-    "fertility_k"
-]
-
 def load_json(path):
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
@@ -46,14 +24,14 @@ def get_greenhouse(catalog, greenhouse_id):
     raise ValueError(f"greenhouse_id not found: {greenhouse_id}")
 
 class Sensor:
-    def __init__(self, greenhouse_id, device, broker, port, latest):
+    def __init__(self, greenhouse_id, device, broker, port, unit, latest):
         self.greenhouse_id = greenhouse_id
         self.sensor_type = device["sensor_type"]
         self.device_id = device["device_id"]
         self.broker = broker
         self.port = port
         self.topic = device["topic"]
-        self.unit = UNITS[self.sensor_type]
+        self.unit = unit
         self.latest = latest
         self.client = MQTTclient(self.device_id, self.broker, self.port)
 
@@ -112,7 +90,8 @@ def start_sensor(device, greenhouse, catalog, latest, running_sensors):
         return
     greenhouse_id = greenhouse["greenhouse_id"]
     freq = int(greenhouse.get("sampling_sec", 5))
-    sensor = Sensor(greenhouse_id, device, catalog["broker"], catalog["port"], latest)
+    sensor_config = catalog["device_types"]["sensors"][device["sensor_type"]]
+    sensor = Sensor(greenhouse_id, device, catalog["broker"], catalog["port"], sensor_config["unit"], latest)
     thread = threading.Thread(target=sensor.run, args=(freq,), daemon=True)
     running_sensors[device_id] = sensor
     thread.start()

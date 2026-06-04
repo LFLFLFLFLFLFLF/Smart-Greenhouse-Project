@@ -12,17 +12,6 @@ let dashboardOptions = {
 let selectedGreenhouse = "GH1";
 let loadedGreenhouse = "GH1";
 
-const SENSOR_ORDER = [
-    "temperature",
-    "humidity",
-    "light",
-    "co2",
-    "soil_moist",
-    "fertility_n",
-    "fertility_p",
-    "fertility_k"
-];
-
 const PLANT_PLACEHOLDERS = ["basil", "pepper", "cucumber", "strawberry", "spinach", "mint"];
 
 function deviceLabel(device) {
@@ -114,7 +103,8 @@ function sensorCards(latest) {
     const entries = Object.entries(latest || {}).sort((left, right) => {
         const leftType = left[1].sensor_type || "";
         const rightType = right[1].sensor_type || "";
-        return SENSOR_ORDER.indexOf(leftType) - SENSOR_ORDER.indexOf(rightType)
+        const sensorOrder = dashboardOptions.sensor_types || [];
+        return sensorOrder.indexOf(leftType) - sensorOrder.indexOf(rightType)
             || left[0].localeCompare(right[0]);
     });
     if (!entries.length) {
