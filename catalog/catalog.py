@@ -30,6 +30,11 @@ def single_device_conflict(greenhouse_id, device_kind, device_type, existing):
         "existing_device": existing
     }
 
+def request_json_body():
+    body_length = int(cherrypy.request.headers.get("Content-Length", 0) or 0)
+    raw_body = cherrypy.request.body.fp.read(body_length) if body_length else b""
+    return json.loads(raw_body.decode("utf-8")) if raw_body else {}
+
 class CatalogUtils:
     def __init__(self, file_path):
         self.file_path = file_path
@@ -194,6 +199,59 @@ class Catalog:
         greenhouse.update(deepcopy(cherrypy.request.json))
         self.catalog.save()
         return {"status": "ok", "greenhouse_id": greenhouse_id}
+
+    @cherrypy.tools.json_out()
+    def DELETE(self, *uri, **params):
+        if not uri:
+            raise cherrypy.HTTPError(404, "resource not found")
+
+        self.catalog.data = self.catalog.load()
+        body = deepcopy(request_json_body())
+
+        if uri[0] == "devices":
+            greenhouse_id = body.get("greenhouse_id", "").strip()
+            device_id = body.get("device_id", "").strip()
+            if not greenhouse_id:
+                raise cherrypy.HTTPError(400, "greenhouse_id is required")
+            if not device_id:
+                raise cherrypy.HTTPError(400, "device_id is required")
+
+            greenhouse = self.catalog.greenhouse(greenhouse_id)
+            for collection_name in ["sensors", "actuators"]:
+                devices = greenhouse.get(collection_name, [])
+                for index, device in enumerate(devices):
+                    if device["device_id"] == device_id:
+                        deleted = devices.pop(index)
+                        self.catalog.save()
+                        return {
+                            "status": "deleted",
+                            "greenhouse_id": greenhouse_id,
+                            "device": deleted
+                        }
+            raise cherrypy.HTTPError(404, "device_id not found")
+
+        if uri[0] == "greenhouses":
+            greenhouse_id = body.get("greenhouse_id", "").strip()
+            if not greenhouse_id:
+                raise cherrypy.HTTPError(400, "greenhouse_id is required")
+            if greenhouse_id in {"GH1", "GH2"}:
+                raise cherrypy.HTTPError(400, "default greenhouses GH1 and GH2 cannot be deleted")
+
+            for index, greenhouse in enumerate(self.catalog.data["greenhouses"]):
+                if greenhouse["greenhouse_id"] == greenhouse_id:
+                    deleted = self.catalog.data["greenhouses"].pop(index)
+                    channels = self.catalog.data.get("thingspeak", {}).get("channels", {})
+                    channels.pop(greenhouse_id, None)
+                    self.catalog.save()
+                    return {
+                        "status": "deleted",
+                        "greenhouse": deleted,
+                        "deleted_sensors": len(deleted.get("sensors", [])),
+                        "deleted_actuators": len(deleted.get("actuators", []))
+                    }
+            raise cherrypy.HTTPError(404, "greenhouse not found")
+
+        raise cherrypy.HTTPError(404, "resource not found")
 
 
 if __name__ == "__main__":

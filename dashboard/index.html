@@ -129,6 +129,23 @@
             <pre id="deviceResult">No device added yet.</pre>
         </section>
 
+        <section class="panel">
+            <div class="panel-heading">
+                <h3>Remove Device Or Greenhouse</h3>
+                <span class="tag warning">Catalog DELETE</span>
+            </div>
+            <p class="hint">Removing a device also stops its runtime connector. Actuators unsubscribe from MQTT before stopping.</p>
+            <div class="form-grid compact">
+                <label>
+                    Device
+                    <select id="removeDevice"></select>
+                </label>
+                <button class="primary send danger" onclick="removeDevice()">Remove Device</button>
+                <button class="primary send danger" onclick="removeGreenhouse()">Remove Current Greenhouse</button>
+            </div>
+            <pre id="removeResult">No remove action yet.</pre>
+        </section>
+
         <section class="panel raw">
             <div class="panel-heading">
                 <h3>Raw API Response</h3>

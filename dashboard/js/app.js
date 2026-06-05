@@ -36,6 +36,26 @@ function actuatorOptionList(select, values) {
     });
 }
 
+function removableDeviceOptionList(select, sensors, actuators) {
+    select.innerHTML = "";
+    const devices = [
+        ...(sensors || []).map((device) => ({
+            device_id: device.device_id,
+            label: `${device.device_id} (Sensor: ${displayName(device.sensor_type)})`
+        })),
+        ...(actuators || []).map((device) => ({
+            device_id: device.device_id,
+            label: `${device.device_id} (Actuator: ${deviceLabel(device)})`
+        }))
+    ];
+    devices.forEach((device) => {
+        const option = document.createElement("option");
+        option.value = device.device_id;
+        option.textContent = device.label;
+        select.appendChild(option);
+    });
+}
+
 function typeOptionList(select, values) {
     select.innerHTML = "";
     values.forEach((value) => {
@@ -163,6 +183,11 @@ async function loadOptions() {
     updateSelectedGreenhouseLabels();
     updateGreenhousePlaceholders();
     actuatorOptionList(document.getElementById("device"), dashboardOptions.actuators);
+    removableDeviceOptionList(
+        document.getElementById("removeDevice"),
+        dashboardOptions.sensors,
+        dashboardOptions.actuators
+    );
     actionOptionList(document.getElementById("action"), dashboardOptions.actions);
     changeDeviceKind();
 }
@@ -187,6 +212,7 @@ function changeGreenhouse() {
     updateSelectedGreenhouseLabels();
     document.getElementById("overrideResult").textContent = "No command sent yet.";
     document.getElementById("deviceResult").textContent = `No device added to ${loadedGreenhouse} yet.`;
+    document.getElementById("removeResult").textContent = `No remove action for ${loadedGreenhouse} yet.`;
 }
 
 async function sendOverride() {
@@ -268,6 +294,48 @@ async function addDevice() {
     });
     const data = await response.json();
     document.getElementById("deviceResult").textContent = JSON.stringify(data, null, 2);
+    await loadSelectedGreenhouse();
+}
+
+async function removeDevice() {
+    const deviceId = document.getElementById("removeDevice").value;
+    if (!deviceId) {
+        document.getElementById("removeResult").textContent = "No device selected.";
+        return;
+    }
+    if (!confirm(`Remove ${deviceId} from ${loadedGreenhouse}?`)) {
+        return;
+    }
+    const response = await fetch("/api/devices", {
+        method: "DELETE",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            greenhouse_id: loadedGreenhouse,
+            device_id: deviceId
+        })
+    });
+    const data = await response.json();
+    document.getElementById("removeResult").textContent = JSON.stringify(data, null, 2);
+    await loadSelectedGreenhouse();
+}
+
+async function removeGreenhouse() {
+    if (!confirm(`Remove greenhouse ${loadedGreenhouse} and all its devices?`)) {
+        return;
+    }
+    const response = await fetch("/api/greenhouses", {
+        method: "DELETE",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            greenhouse_id: loadedGreenhouse
+        })
+    });
+    const data = await response.json();
+    document.getElementById("removeResult").textContent = JSON.stringify(data, null, 2);
+    if (response.ok) {
+        selectedGreenhouse = dashboardOptions.default_greenhouse_id;
+        loadedGreenhouse = selectedGreenhouse;
+    }
     await loadSelectedGreenhouse();
 }
 
