@@ -1,6 +1,6 @@
 # Smart Greenhouse Project
 
-A microservice IoT platform for smart greenhouses.
+A microservice IoT platform for smart greenhouses --- 2025 POLITO  IOT GROUP 8
 
 ## Structure
 
