@@ -26,6 +26,7 @@ class Actuator:
         self.label = label
         self.topic = device["topic"]
         self.states = states
+        self.active = True
         self.client = MQTTclient(self.device_id, self.broker, self.port)
         self.client.register_callbacks(on_mes=self.notify)
         self.states.setdefault(self.greenhouse_id, {})[self.device_id] = {
@@ -40,9 +41,11 @@ class Actuator:
     def start(self):
         self.client.start()
         self.client.subscribe(self.topic, qos=0)
-        print(f"[Actuator] {self.greenhouse_id} {self.label} subscribes {self.topic}")
+        print(f"[Actuator] {self.greenhouse_id} {self.label} subscribes {self.topic}", flush=True)
 
     def notify(self, client, userdata, msg):
+        if not self.active:
+            return
         command = json.loads(msg.payload.decode("utf-8"))
         target_device = command.get("device_id", command.get("device"))
         if target_device != self.device_id:
@@ -74,10 +77,12 @@ class Actuator:
             "priority": incoming_priority,
             "updated_at": int(time.time())
         }
-        print(f"[Actuator] {self.device_id} -> {state}")
+        print(f"[Actuator] {self.device_id} -> {state}", flush=True)
 
     def auto_off(self, duration, source):
         time.sleep(duration)
+        if not self.active:
+            return
         self.states.setdefault(self.greenhouse_id, {})[self.device_id] = {
             "device_id": self.device_id,
             "actuator_type": self.actuator_type,
@@ -86,7 +91,23 @@ class Actuator:
             "priority": 0,
             "updated_at": int(time.time())
         }
-        print(f"[Actuator] {self.device_id} -> OFF")
+        print(f"[Actuator] {self.device_id} -> OFF", flush=True)
+
+    def stop(self):
+        self.active = False
+        try:
+            self.client.unsubscribe(self.topic)
+            print(f"[Actuator] {self.device_id} unsubscribed {self.topic}", flush=True)
+        except Exception as exc:
+            print(f"[Actuator] {self.device_id} unsubscribe failed: {exc}", flush=True)
+        self.states.get(self.greenhouse_id, {}).pop(self.device_id, None)
+        if not self.states.get(self.greenhouse_id):
+            self.states.pop(self.greenhouse_id, None)
+        try:
+            self.client.finalize()
+        except Exception as exc:
+            print(f"[Actuator] {self.device_id} MQTT finalize failed: {exc}", flush=True)
+        print(f"[Actuator] {self.device_id} stopped", flush=True)
 
 class ActuatorREST:
     exposed = True
@@ -149,11 +170,22 @@ def sync_actuators(catalog_url, states, command_topics, actuators):
     while True:
         try:
             catalog = requests.get(f"{catalog_url}/catalog", timeout=5).json()
+            catalog_device_ids = set()
+            catalog_greenhouse_ids = {greenhouse["greenhouse_id"] for greenhouse in catalog["greenhouses"]}
             for greenhouse in catalog["greenhouses"]:
                 for device in greenhouse.get("actuators", []):
+                    catalog_device_ids.add(device["device_id"])
                     start_actuator(device, greenhouse, catalog, states, command_topics, actuators)
-        except requests.RequestException as exc:
-            print(f"[Actuator] catalog sync failed: {exc}")
+            for device_id in list(actuators):
+                if device_id not in catalog_device_ids:
+                    actuator = actuators.pop(device_id)
+                    actuator.stop()
+                    command_topics.get(actuator.greenhouse_id, {}).pop(device_id, None)
+            for greenhouse_id in list(command_topics):
+                if greenhouse_id not in catalog_greenhouse_ids or not command_topics[greenhouse_id]:
+                    command_topics.pop(greenhouse_id, None)
+        except Exception as exc:
+            print(f"[Actuator] catalog sync failed: {exc}", flush=True)
         time.sleep(10)
 
 

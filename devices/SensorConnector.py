@@ -34,6 +34,7 @@ class Sensor:
         self.unit = unit
         self.latest = latest
         self.client = MQTTclient(self.device_id, self.broker, self.port)
+        self.active = True
 
     def get_value(self):
         if self.sensor_type == "temperature":
@@ -50,8 +51,8 @@ class Sensor:
 
     def run(self, freq):
         self.client.start()
-        print(f"[Sensor] {self.greenhouse_id} {self.sensor_type} publishes to {self.topic}")
-        while True:
+        print(f"[Sensor] {self.greenhouse_id} {self.sensor_type} publishes to {self.topic}", flush=True)
+        while self.active:
             value = self.get_value()
             message = {
                 "bn": self.device_id,
@@ -70,6 +71,17 @@ class Sensor:
             self.latest.setdefault(self.greenhouse_id, {})[self.device_id] = message
             self.client.publish(self.topic, json.dumps(message), qos=0)
             time.sleep(freq)
+        print(f"[Sensor] {self.device_id} stopped", flush=True)
+
+    def stop(self):
+        self.active = False
+        self.latest.get(self.greenhouse_id, {}).pop(self.device_id, None)
+        if not self.latest.get(self.greenhouse_id):
+            self.latest.pop(self.greenhouse_id, None)
+        try:
+            self.client.finalize()
+        except Exception as exc:
+            print(f"[Sensor] {self.device_id} MQTT finalize failed: {exc}", flush=True)
 
 class SensorREST:
     exposed = True
@@ -100,11 +112,16 @@ def sync_sensors(catalog_url, latest, running_sensors):
     while True:
         try:
             catalog = requests.get(f"{catalog_url}/catalog", timeout=5).json()
+            catalog_device_ids = set()
             for greenhouse in catalog["greenhouses"]:
                 for device in greenhouse.get("sensors", []):
+                    catalog_device_ids.add(device["device_id"])
                     start_sensor(device, greenhouse, catalog, latest, running_sensors)
-        except requests.RequestException as exc:
-            print(f"[Sensor] catalog sync failed: {exc}")
+            for device_id in list(running_sensors):
+                if device_id not in catalog_device_ids:
+                    running_sensors.pop(device_id).stop()
+        except Exception as exc:
+            print(f"[Sensor] catalog sync failed: {exc}", flush=True)
         time.sleep(10)
 
 

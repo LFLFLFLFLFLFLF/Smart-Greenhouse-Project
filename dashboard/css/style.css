@@ -235,6 +235,14 @@ button {
     background: var(--green-dark);
 }
 
+.danger {
+    background: #c53030;
+}
+
+.danger:hover {
+    background: #9b2c2c;
+}
+
 .send {
     height: 46px;
 }

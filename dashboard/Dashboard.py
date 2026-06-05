@@ -27,6 +27,17 @@ class Dashboard:
     def catalog(self):
         return requests.get(f"{self.catalog_url}/catalog", timeout=5).json()
 
+    def response_body(self, response):
+        try:
+            return response.json()
+        except ValueError:
+            return response.text
+
+    def request_body(self):
+        body_length = int(cherrypy.request.headers.get("Content-Length", 0) or 0)
+        raw_body = cherrypy.request.body.fp.read(body_length) if body_length else b""
+        return json.loads(raw_body.decode("utf-8")) if raw_body else {}
+
     def greenhouse(self, catalog, greenhouse_id):
         for greenhouse in catalog["greenhouses"]:
             if greenhouse["greenhouse_id"] == greenhouse_id:
@@ -106,6 +117,19 @@ class Dashboard:
             response = requests.post(f"{self.catalog_url}/devices", json=body, timeout=5)
             cherrypy.response.status = response.status_code
             return {"status_code": response.status_code, "response": response.json()}
+        raise cherrypy.HTTPError(404, "resource not found")
+
+    @cherrypy.tools.json_out()
+    def DELETE(self, *uri, **params):
+        body = self.request_body()
+        if len(uri) == 2 and uri[0] == "api" and uri[1] == "devices":
+            response = requests.delete(f"{self.catalog_url}/devices", json=body, timeout=5)
+            cherrypy.response.status = response.status_code
+            return {"status_code": response.status_code, "response": self.response_body(response)}
+        if len(uri) == 2 and uri[0] == "api" and uri[1] == "greenhouses":
+            response = requests.delete(f"{self.catalog_url}/greenhouses", json=body, timeout=5)
+            cherrypy.response.status = response.status_code
+            return {"status_code": response.status_code, "response": self.response_body(response)}
         raise cherrypy.HTTPError(404, "resource not found")
 
 
